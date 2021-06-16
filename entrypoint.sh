@@ -10,24 +10,28 @@ if [[ -n $DEBUG  && $DEBUG = true ]]; then
 fi
 
 target=$1
-pkgname=$2
+pkgbuild_dir=$2
+pkgbuild_dir=$(realpath ${pkgbuild_dir})
+
+# Remove comments
+pkgname=$(awk '/pkgname=/ {print}' "$pkbuild_dir/${PKGBUILD}" | head -n1 | cut -d'#' -f1 | cut -d'=' -f2 | sed -e 's/^ *//g' | sed -e 's/ *$//g')
 command=$3
 
 # assumes that package files are in a subdirectory
 # of the same name as "pkgname", so this works well
 # with "aurpublish" tool
 
-if [[ ! -d $pkgname ]]; then
-    echo "$pkgname should be a directory."
+if [[ ! -d ${pkgbuild_dir} ]]; then
+    echo "$pkgbuild_dir should be a directory."
     exit 1
 fi
 
-if [[ ! -e $pkgname/PKGBUILD ]]; then
-    echo "$pkgname does not contain a PKGBUILD file."
+if [[ ! -e "${pkgbuild_dir}/PKGBUILD" ]]; then
+    echo "${pkgbuild_dir} does not contain a PKGBUILD file."
     exit 1
 fi
 
-pkgbuild_dir=$(readlink "$pkgname" -f) # nicely cleans up path, ie. ///dsq/dqsdsq/my-package//// -> /dsq/dqsdsq/my-package
+pkgbuild_dir=$(readlink "$pkgbuild_dir" -f) # nicely cleans up path, ie. ///dsq/dqsdsq/my-package//// -> /dsq/dqsdsq/my-package
 
 getfacl -p -R "$pkgbuild_dir" /github/home > /tmp/arch-pkgbuild-builder-permissions.bak
 
@@ -44,8 +48,6 @@ echo "keyserver hkp://keyserver.ubuntu.com:80" | tee /github/home/.gnupg/gpg.con
 
 cd "$pkgbuild_dir"
 
-pkgname="$(basename "$pkgbuild_dir")" # keep quotes in case someone passes in a directory path with whitespaces...
-
 install_deps() {
     # install make and regular package dependencies
     grep -E 'depends|makedepends' PKGBUILD | \
@@ -60,7 +62,7 @@ case $target in
         namcap PKGBUILD
         install_deps
         makepkg --syncdeps --noconfirm
-        namcap "${pkgname}"-*
+        namcap "${pkgname}"-*.tar.zst
 
         # shellcheck disable=SC1091
         source /etc/makepkg.conf # get PKGEXT
