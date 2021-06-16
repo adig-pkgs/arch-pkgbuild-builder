@@ -14,7 +14,7 @@ pkgbuild_dir=$1
 pkgbuild_dir=$(realpath ${pkgbuild_dir})
 
 # Remove comments
-pkgname=$(awk '/pkgname=/ {print}' "$pkbuild_dir/${PKGBUILD}" | head -n1 | cut -d'#' -f1 | cut -d'=' -f2 | sed -e 's/^ *//g' | sed -e 's/ *$//g')
+pkgname=$(awk '/pkgname=/ {print}' "${pkgbuild_dir}/PKGBUILD" | head -n1 | cut -d'#' -f1 | cut -d'=' -f2 | sed -e 's/^ *//g' | sed -e 's/ *$//g')
 command=$3
 
 # assumes that package files are in a subdirectory
