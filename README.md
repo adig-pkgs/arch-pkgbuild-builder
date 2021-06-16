@@ -1,76 +1,61 @@
 # Arch Linux PKGBUILD builder action
 
-This action builds an validates Arch Linux package.
-The `PKGBUILD` and `.SRCINFO` files should be under a subdirectory named the same as the `pkgbuild` of the package.
-This assumption is made so this action works well with [aurpublish].
+Differences from original repo -
+* Uses pkgbuild\_dir variable instead of 'pkgname' to be used as directory containing the PKGBUILD
+* You don't need to tell the 'pkgname', the script automatically extracts that info from PKGBUILD file
+* Everything has defaults, and with point 2 above, you need 0 configuration on most repos
 
-[aurpublish]: https://github.com/eli-schwartz/aurpublish
+This action builds an validates Arch Linux package.
+The directory containing `PKGBUILD` and `.SRCINFO` files can be specified in `pkgbuild\_dir` if not in the root of the repo (default is '.')
+
+> Why this fork ?
+> 1. Because I have PKGBUILD in root of repo.
+> 2. Zero config use (Just add uses: '', and it should work)
 
 ## Inputs
 
 ### `target`
 
-**Required** Validation target. Can be one of: `pkgbuild`, `srcinfo`, `run`.
+**Default: pkgbuild** Validation target. Can be one of: `pkgbuild`, `srcinfo`, `run`.
 
-### `pkgname`
+### `pkgbuild_dir`
 
-**Required** Path to DIRECTORY where the PKGBUILD file is.
-Assumes the directory is the name of package, ie /path/to/pkgname/'
+**Default: '.'** Path to DIRECTORY where the PKGBUILD file is.
+
+The `pkgname` is automatically extracted from the PKGBUILD
+
+> TODO: Add this as input to explicitly tell the pkgname
+
+### `debug`
+
+Set to `true` to print the commands executed (ie. sh -x)
 
 ## Example usage
 
-### pkgbuild
+For most of the repos out there, this will work
 
-Verifies and builds the package.
-
-```yml
-uses: 2m/arch-pkgbuild-builder@v1.16
-with:
-  target: 'pkgbuild'
-  pkgname: 'ucm-bin'
-```
-
-### srcinfo
-
-Verifies if the `.SRCINFO` is up to date with the `PKGBUILD`.
+Create `.github/workflows/pkgbuild.yml` (or other filename) with this content:
 
 ```yml
-uses: 2m/arch-pkgbuild-builder@v1.16
-with:
-  target: 'srcinfo'
-  pkgname: 'ucm-bin'
+name: pkgbuild
+
+on: push
+
+jobs:
+  pkgbuild_job:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: adig-pkgs/arch-pkgbuild-builder@v2.0
 ```
 
-### run
-
-Installs the package and runs a given `command`.
-
-```yml
-uses: 2m/arch-pkgbuild-builder@v1.16
-with:
-  target: 'run'
-  pkgname: 'ucm-bin'
-  command: `ucm --version`
-```
-
-### debug mode (optional)
-
-Add a `debug: true` key, ie.
-
- ```yml
- uses: 2m/arch-pkgbuild-builder@v1.16
- with:
-   debug: true
-   target: 'srcinfo'
-   pkgname: 'ucm-bin'
- ```
-
-This will run `entrypoint.sh` with `set -x` on.
+> This currently doesn't work for split-packages (ie. if your PKGBUILD contains `pkgname=('a-aef' 'b-aef' 'c-aef') # my package`)
 
 ## Used by
 
-So far this action is used by the following packages:
+All repos (source repo, not \*-git repo) in this organisation
 
-* [ucm-bin](https://github.com/2m/ucm-bin-pkgbuild)
-* [authenticator-rs](https://github.com/grumlimited/authenticator-rs)
-* [cpeditor](https://github.com/cpeditor/cpeditor)
+For eg. 
+[pkgbuild.yml in Ludo-The Game](https://github.com/adi-g15/Ludo-The_Game/blob/master/.github/workflows/pkgbuild.yml)
+[pkgbuild.yml in worldLineSim](https://github.com/adi-g15/worldLineSim/blob/main/.github/workflows/pkgbuild.yml)
+
