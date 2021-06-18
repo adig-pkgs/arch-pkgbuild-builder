@@ -14,6 +14,8 @@ The directory containing `PKGBUILD` and `.SRCINFO` files can be specified in `pk
 
 ## Inputs
 
+> ALL of these are optional
+
 ### `target`
 
 **Default: pkgbuild** Validation target. Can be one of: `pkgbuild`, `srcinfo`, `run`.
@@ -22,7 +24,12 @@ The directory containing `PKGBUILD` and `.SRCINFO` files can be specified in `pk
 
 **Default: '.'** Path to DIRECTORY where the PKGBUILD file is.
 
-The `pkgname` is automatically extracted from the PKGBUILD
+### `pkgname`
+
+Totally optional, will work for most cases even if you leave it
+**If needed, you can explicitly state it**
+
+**Default: ** The `pkgname` is automatically extracted from the PKGBUILD
 
 > TODO: Add this as input to explicitly tell the pkgname
 
@@ -46,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: adig-pkgs/arch-pkgbuild-builder@v2.0
+    - uses: adig-pkgs/arch-pkgbuild-builder@v2.1
 ```
 
 > This currently doesn't work for split-packages (ie. if your PKGBUILD contains `pkgname=('a-aef' 'b-aef' 'c-aef') # my package`)

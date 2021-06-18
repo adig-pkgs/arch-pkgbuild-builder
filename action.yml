@@ -11,6 +11,11 @@ inputs:
       Path to Directory containing the PKGBUILD file
     required: false
     default: '.'
+  pkgname:
+    description: >-
+      Explicitly state the pkgname, if you are facing any difficulties
+    required: false
+    default: ''
   target:
     description: >-
       Validation target.
@@ -34,3 +39,4 @@ runs:
     - ${{ inputs.target }}
     - ${{ inputs.command }}
     - ${{ inputs.debug }}
+    - ${{ inputs.pkgname }}
